@@ -1,0 +1,30 @@
+
+## 每隔3小时拉取一次作者脚本到自己仓库的分支
+name: helpu-sync
+on:
+  schedule:
+    - cron: '6 */3 * * *'
+  workflow_dispatch:
+  watch:
+    types: started
+  repository_dispatch:
+    types: sync-helpu-JDHelp
+jobs:
+  repo-sync:
+    env:
+      PAT: ${{ secrets.PAT }} 
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: sync helpu-JDHelp
+        uses: repo-sync/github-sync@v2
+        if: env.PAT
+        with:
+          source_repo: "https://github.com/he1pu/JDHelp"
+          source_branch: "main"
+          destination_branch: "main"
+          github_token: ${{ secrets.PAT }}
